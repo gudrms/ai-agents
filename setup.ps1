@@ -1,4 +1,4 @@
-# ai-agents setup.ps1
+﻿# ai-agents setup.ps1
 # 새 PC에서 clone 후 실행: ./setup.ps1
 # 요구사항: Windows Developer Mode 또는 관리자 권한 (SymbolicLink 생성용)
 
@@ -14,6 +14,10 @@ $codexDir = Join-Path $base "codex"
 
 if (-not (Test-Path -LiteralPath $profilesDir)) {
     throw "profiles 폴더를 찾을 수 없습니다: $profilesDir"
+}
+
+if (-not (Test-Path -LiteralPath $codexDir)) {
+    throw "codex 폴더를 찾을 수 없습니다: $codexDir"
 }
 
 $agents = Get-ChildItem -LiteralPath $profilesDir -Filter "*.md" |
@@ -51,7 +55,11 @@ function Backup-Or-RemoveExisting {
     if ($isManagedLink) {
         Write-Host "  [Replace] 기존 링크 제거: $Path"
         if (-not $DryRun) {
-            Remove-Item -LiteralPath $Path -Force
+            if ($item.PSIsContainer) {
+                [System.IO.Directory]::Delete($item.FullName)
+            } else {
+                [System.IO.File]::Delete($item.FullName)
+            }
         }
         return
     }
@@ -135,5 +143,29 @@ foreach ($agent in $agents) {
     Write-Host ""
 }
 
+$codexOnlySkills = Get-ChildItem -LiteralPath $codexDir -Directory |
+    Where-Object { $agents -notcontains $_.Name } |
+    Sort-Object Name |
+    ForEach-Object { $_.Name }
+
+foreach ($skill in $codexOnlySkills) {
+    $codexSkillDir = Join-Path $codexDir $skill
+    $codexSkillPath = Join-Path $codexSkillDir "SKILL.md"
+
+    if (-not (Test-Path -LiteralPath $codexSkillPath)) {
+        Write-Warning "Codex 스킬 파일이 없어 건너뜁니다: $codexSkillPath"
+        continue
+    }
+
+    Write-Host "[codex:$skill]"
+
+    New-SafeJunction `
+        -Path (Join-Path $env:USERPROFILE ".codex\skills\$skill") `
+        -Target $codexSkillDir
+
+    Write-Host ""
+}
+
 Write-Host "완료. 연결된 에이전트: $($agents.Count)개 x 3개 툴 (Claude / Codex / Gemini)"
+Write-Host "Codex 전용 스킬: $($codexOnlySkills.Count)개"
 Write-Host "기존 일반 파일/폴더는 .backup.YYYYMMDDHHMMSS 이름으로 보존됩니다."

@@ -13,11 +13,16 @@ ai-agents/
     frontend-developer.md
     code-reviewer.md
     database-architect.md
+    project-start-harness.md
 
   codex/                         # Codex / Gemini 어댑터
     {name}/
       SKILL.md                   → ../../profiles/{name}.md (심링크)
       agents/openai.yaml         ← Codex 메타데이터 (5줄, 거의 안 바뀜)
+
+    agent/                       # Codex 전용 /agent 메뉴 스킬
+      SKILL.md
+      agents/openai.yaml
 
   setup.ps1                      # 심링크/junction 자동 생성 스크립트
   README.md
@@ -31,10 +36,12 @@ ai-agents/
 | frontend-developer | Next.js/React/Tailwind UI 컴포넌트, 상태 관리 |
 | code-reviewer | 코드 품질/보안/성능 리뷰 (읽기 전용) |
 | database-architect | PostgreSQL/Supabase 스키마 설계, 쿼리 최적화 |
+| project-start-harness | 새 프로젝트/기능 시작 전 목표, 범위, 검증 정리 |
+| agent | /agent 입력 시 간략한 에이전트/스킬 목록 표시 |
 
 ## 동작 원리
 
-실제 파일은 `profiles/` 에만 존재하고, 각 AI 툴 경로는 심링크/junction으로 연결됩니다.
+역할 에이전트의 실제 파일은 `profiles/` 에만 존재하고, 각 AI 툴 경로는 심링크/junction으로 연결됩니다. `agent` 같은 Codex 전용 스킬은 `codex/` 아래에 원본을 둡니다.
 
 ```
 profiles/backend-developer.md       ← 실제 파일 (여기만 수정)
@@ -84,6 +91,7 @@ cd $env:USERPROFILE\ai-agents
 ```powershell
 ./setup.ps1 -DryRun
 ```
+
 ## 에이전트 추가 방법
 
 1. `profiles/{name}.md` 작성 (frontmatter: `name`, `description` 만)
