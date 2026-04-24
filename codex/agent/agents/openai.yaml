@@ -1,0 +1,3 @@
+display_name: Agent
+short_description: 사용할 수 있는 Codex 스킬과 작업 역할을 메뉴처럼 보여줍니다.
+default_prompt: /agent

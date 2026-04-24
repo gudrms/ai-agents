@@ -1,0 +1,3 @@
+display_name: Project Start Harness
+short_description: 작업 시작 전 목표, 범위, 계획, 검증 기준을 잡아 누락을 줄입니다.
+default_prompt: 이 작업을 구현하기 전에 project-start-harness로 목표, 범위, 검증 방법을 먼저 정리해줘.

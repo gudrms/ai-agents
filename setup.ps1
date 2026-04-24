@@ -106,6 +106,11 @@ Write-Host "ai-agents 링크 설정 시작..."
 Write-Host "base: $base"
 if ($DryRun) { Write-Host "mode: DryRun" }
 Write-Host ""
+Write-Host "[gemini:agents]"
+New-SafeJunction `
+    -Path (Join-Path $env:USERPROFILE ".gemini\agents") `
+    -Target $profilesDir
+Write-Host ""
 
 foreach ($agent in $agents) {
     $profilePath = Join-Path $profilesDir "$agent.md"
@@ -135,6 +140,7 @@ foreach ($agent in $agents) {
     New-SafeJunction `
         -Path (Join-Path $env:USERPROFILE ".codex\skills\$agent") `
         -Target $codexSkillDir
+
 
     New-SafeJunction `
         -Path (Join-Path $env:USERPROFILE ".gemini\skills\$agent") `
@@ -166,6 +172,6 @@ foreach ($skill in $codexOnlySkills) {
     Write-Host ""
 }
 
-Write-Host "완료. 연결된 에이전트: $($agents.Count)개 x 3개 툴 (Claude / Codex / Gemini)"
+Write-Host "완료. 연결된 에이전트: $($agents.Count)개 (Claude agents / Codex skills / Gemini agents / Gemini skills)"
 Write-Host "Codex 전용 스킬: $($codexOnlySkills.Count)개"
 Write-Host "기존 일반 파일/폴더는 .backup.YYYYMMDDHHMMSS 이름으로 보존됩니다."

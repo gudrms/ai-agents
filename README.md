@@ -47,6 +47,7 @@ ai-agents/
 profiles/backend-developer.md       ← 실제 파일 (여기만 수정)
          │
          ├── ~/.claude/agents/backend-developer.md     (심링크)
+         ├── ~/.gemini/agents/                         (profiles 폴더 junction, /agents 목록)
          │
          └── codex/backend-developer/SKILL.md          (심링크)
                     │
@@ -60,7 +61,8 @@ profiles/backend-developer.md       ← 실제 파일 (여기만 수정)
 |----|-----------|------|
 | Claude Code | 파일 심링크 | `~/.claude/agents/{name}.md` |
 | Codex | 폴더 junction | `~/.codex/skills/{name}/` |
-| Gemini CLI | 폴더 junction | `~/.gemini/skills/{name}/` |
+| Gemini CLI subagents | 폴더 junction | `~/.gemini/agents/` -> `profiles/` |
+| Gemini CLI skills | 폴더 junction | ~/.gemini/skills/{name}/ |
 
 ## 새 PC 설치
 
