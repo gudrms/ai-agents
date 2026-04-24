@@ -1,6 +1,8 @@
-# ai-agents
+# ai-agent-profiles
 
-Claude, Codex 등 AI 툴에서 공통으로 사용하는 에이전트 프로필 중앙 관리 저장소.
+Claude Code, Codex, Gemini CLI에서 공통으로 사용하는 AI 에이전트 프로필 중앙 관리 저장소.
+
+`profiles/` 하나만 수정하면 세 툴에 즉시 반영됩니다.
 
 ## 구조
 
@@ -12,11 +14,10 @@ ai-agents/
     code-reviewer.md
     database-architect.md
 
-  codex/                         # Codex 어댑터 (SKILL.md는 profiles/ 심링크)
-    backend-developer/
-      SKILL.md -> ../../profiles/backend-developer.md
-      agents/openai.yaml
-    ...
+  codex/                         # Codex / Gemini 어댑터
+    {name}/
+      SKILL.md                   → ../../profiles/{name}.md (심링크)
+      agents/openai.yaml         ← Codex 메타데이터 (5줄, 거의 안 바뀜)
 
   setup.ps1                      # 심링크/junction 자동 생성 스크립트
   README.md
@@ -33,38 +34,66 @@ ai-agents/
 
 ## 동작 원리
 
-실제 파일은 `profiles/` 에만 존재하고, 각 AI 툴 경로는 심링크/junction으로 연결됨.
+실제 파일은 `profiles/` 에만 존재하고, 각 AI 툴 경로는 심링크/junction으로 연결됩니다.
 
 ```
-profiles/backend-developer.md  ← 실제 파일
-
-~/.claude/agents/backend-developer.md     → 심링크
-~/.codex/skills/backend-developer/        → junction
-  └── SKILL.md                            → 심링크
+profiles/backend-developer.md       ← 실제 파일 (여기만 수정)
+         │
+         ├── ~/.claude/agents/backend-developer.md     (심링크)
+         │
+         └── codex/backend-developer/SKILL.md          (심링크)
+                    │
+                    ├── ~/.codex/skills/backend-developer/   (junction)
+                    └── ~/.gemini/skills/backend-developer/  (junction)
 ```
 
-`profiles/` 파일 하나만 수정하면 모든 AI 툴에 즉시 반영됨.
+## 지원 툴
+
+| 툴 | 연결 방식 | 경로 |
+|----|-----------|------|
+| Claude Code | 파일 심링크 | `~/.claude/agents/{name}.md` |
+| Codex | 폴더 junction | `~/.codex/skills/{name}/` |
+| Gemini CLI | 폴더 junction | `~/.gemini/skills/{name}/` |
 
 ## 새 PC 설치
 
 ```powershell
 git clone <repo-url> $env:USERPROFILE\ai-agents
 cd $env:USERPROFILE\ai-agents
+
+# 먼저 변경될 링크만 확인
+./setup.ps1 -DryRun
+
+# 실제 링크 생성
 ./setup.ps1
 ```
 
-> 심링크 생성에 Windows Developer Mode 또는 관리자 권한이 필요할 수 있음.
+> 심링크 생성에 Windows Developer Mode 또는 관리자 권한이 필요할 수 있습니다. 기존 경로가 일반 파일/폴더이면 삭제하지 않고 `.backup.YYYYMMDDHHMMSS` 이름으로 백업한 뒤 링크를 생성합니다. 기존 경로가 심링크/junction이면 링크만 교체합니다.
 
+
+## 기존 설정 처리
+
+`setup.ps1`은 중복을 없애기 위해 각 툴의 기존 경로를 중앙 저장소 링크로 교체합니다.
+
+- 기존 경로가 심링크 또는 junction이면 링크만 제거하고 새 링크를 만듭니다.
+- 기존 경로가 일반 파일 또는 일반 폴더이면 삭제하지 않고 `.backup.YYYYMMDDHHMMSS` 이름으로 이동합니다.
+- 실제 원본은 `profiles/`에만 두고, Claude/Codex/Gemini 경로는 링크로 유지합니다.
+
+실제 변경 전에 확인하려면 다음을 실행합니다.
+
+```powershell
+./setup.ps1 -DryRun
+```
 ## 에이전트 추가 방법
 
-1. `profiles/` 에 `{name}.md` 작성 (frontmatter: `name`, `description` 만)
+1. `profiles/{name}.md` 작성 (frontmatter: `name`, `description` 만)
 2. `codex/{name}/agents/openai.yaml` 작성
-3. `setup.ps1` 의 `$agents` 배열에 이름 추가
+3. `./setup.ps1 -DryRun` 으로 연결 대상 확인
 4. `./setup.ps1` 재실행
 
 ## frontmatter 규칙
 
-`profiles/` 파일은 Claude/Codex 양쪽 호환을 위해 `name`, `description` 만 사용:
+`profiles/` 파일은 Claude / Codex / Gemini 호환을 위해 `name`, `description` 만 사용합니다.
 
 ```markdown
 ---
@@ -73,4 +102,4 @@ description: "에이전트 역할 설명"
 ---
 ```
 
-Claude 전용 `tools`, `model` 필드는 넣지 않음 (Codex validator 호환성).
+Claude 전용 `tools`, `model` 필드는 넣지 않습니다 (Codex / Gemini validator 호환성).
